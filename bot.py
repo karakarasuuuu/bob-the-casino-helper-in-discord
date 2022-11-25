@@ -1,5 +1,6 @@
-import discord
 import json
+import discord
+import inspect
 from discord.ext import commands
 from collections import defaultdict
 
@@ -10,7 +11,7 @@ with open('items.json', 'r', encoding='utf8') as file:
 intents = discord.Intents.default()
 intents.message_content = True
 
-bot = commands.Bot(command_prefix='$', intents=intents)
+bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 bot.started = False
 
 @bot.event
@@ -73,23 +74,24 @@ async def start(cfx):
 
 # End the current game
 @bot.command()
-async def end(cfx):
-    if sum(bot.pool.values()) != 0:
+async def end(cfx, *args):
+    if len(args) == 1 and args[0] == '-f':
+        await cfx.send('好ㄅ，強制清零')
+    elif sum(bot.pool.values()) != 0:
         await cfx.send('還沒達到零和，有人不老實')
+        return
     else:
-        message = ''
         for member, bet_ in bot.pool.items():
             if bet_ > 0:
-                message += f'{member.mention} 贏了 {bet_} 個籌碼'
+                message = f'{member.mention} 贏了 {bet_} 個籌碼'
             elif bet_ == 0:
-                message += f'{member.mention} 沒輸沒贏'
+                message = f'{member.mention} 沒輸沒贏'
             elif bet_ < 0:
-                message += f'{member.mention} 輸了 {abs(bet_)} 個籌碼'
-            message += '\n'
+                message = f'{member.mention} 輸了 {abs(bet_)} 個籌碼'
+            await cfx.send(message)
 
-        await cfx.send(message)
-        bot.pool.clear()
-        bot.started = False
+    bot.pool.clear()
+    bot.started = False
 
 # Show the current balance
 @bot.command()
@@ -98,10 +100,25 @@ async def status(cfx):
         await cfx.send('還沒開始，別急')
         return
 
+    if not bot.pool:
+        await cfx.send('還沒有人開始玩。。。')
+        return
+
     message = ''
     for member, bet_ in bot.pool.items():
-        message += f'{member.mention} 現在有 {bet_} 個籌碼\n'
+        await cfx.send(f'{member.mention} 現在有 {bet_} 個籌碼\n')
 
+# Help message
+@bot.command()
+async def help(cfx):
+    message = inspect.cleandoc( # Use it to clean the blanks on the left
+        '''
+        **$help**: 顯示此幫助訊息
+        **$start**: 開始一場賽局
+        **$bet** *[標別人可以幫別人輸入]* *<籌碼數量>*: 輸入籌碼
+        **$end** *[-f]*: 結束一場賽局。附上參數 `-f` 則強制結束（不論結果）
+        **$status**: 查看當前的情況
+        ''')
     await cfx.send(message)
 
 if __name__ == '__main__':
