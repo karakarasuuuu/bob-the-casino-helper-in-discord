@@ -32,11 +32,11 @@ async def test(cfx, arg=None):
 @bot.command()
 async def bet(cfx, *args):
     if not bot.started:
-        await cfx.send('還沒開始，別急')
+        await cfx.reply('還沒開始，別急')
         return
 
     if len(args) not in [1, 2]:
-        await cfx.send('參數數量不對，回復上一動')
+        await cfx.reply('參數數量不對，回復上一動')
         return
 
     member, bet_ = (cfx.author, args[0]) if len(args) == 1 else (args[0], args[1])
@@ -45,11 +45,11 @@ async def bet(cfx, *args):
     try:
         bet_ = eval(bet_)
     except:
-        await cfx.send('怪怪的餒')
+        await cfx.reply('怪怪的餒')
         return
     
     if not isinstance(bet_, int):
-        await cfx.send('這不是整數吧')
+        await cfx.reply('這不是整數吧')
         return
     
     # Deal with member
@@ -57,11 +57,11 @@ async def bet(cfx, *args):
         try:
             member = await commands.MemberConverter().convert(cfx, member)
         except commands.MemberNotFound:
-            await cfx.send('找不到這個人餒')
+            await cfx.reply('找不到這個人餒')
             return
 
     bot.pool[member] += int(bet_)
-    await cfx.send(f'幫 {member.mention} 記下一筆 {bet_} 的紀錄 ~')
+    await cfx.reply(f'幫 {member.mention} 記下一筆 {bet_} 的紀錄 ~')
 
 
 # Start a new game
@@ -81,14 +81,7 @@ async def end(cfx, *args):
         await cfx.send('還沒達到零和，有人不老實')
         return
     else:
-        for member, bet_ in bot.pool.items():
-            if bet_ > 0:
-                message = f'{member.mention} 贏了 {bet_} 個籌碼'
-            elif bet_ == 0:
-                message = f'{member.mention} 沒輸沒贏'
-            elif bet_ < 0:
-                message = f'{member.mention} 輸了 {abs(bet_)} 個籌碼'
-            await cfx.send(message)
+        await status(cfx)
 
     bot.pool.clear()
     bot.started = False
@@ -104,9 +97,14 @@ async def status(cfx):
         await cfx.send('還沒有人開始玩。。。')
         return
 
-    message = ''
     for member, bet_ in bot.pool.items():
-        await cfx.send(f'{member.mention} 現在有 {bet_} 個籌碼\n')
+        if bet_ > 0:
+            message = f'{member.mention} 贏了 {bet_} 個籌碼'
+        elif bet_ == 0:
+            message = f'{member.mention} 沒輸沒贏'
+        elif bet_ < 0:
+            message = f'{member.mention} 輸了 {abs(bet_)} 個籌碼'
+        await cfx.send(message)
 
 # Help message
 @bot.command()
