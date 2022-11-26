@@ -74,7 +74,7 @@ async def bet(cfx, *args):
             return
 
     bot.pools[id(cfx.channel)][member] += int(bet_)
-    await cfx.reply(f'幫 {member.mention} 記下一筆{"贏" if bet_ > 0 else "輸"} {abs(bet_)} 的紀錄 ~')
+    await cfx.reply(f'幫 {member.mention} 記下一筆*{"贏" if bet_ > 0 else "輸"} {abs(bet_)}* 個籌碼的紀錄 ~')
 
 # Start a new game
 # TODO: Add support of multiple channels. Kind of like the problem you faced at the graduate project
