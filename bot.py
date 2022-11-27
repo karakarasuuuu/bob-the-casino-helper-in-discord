@@ -144,6 +144,8 @@ async def help(cfx):
         **$bet** *[標別人可以幫別人輸入]* *<籌碼數量>*: 輸入籌碼
         **$end** *[-f]*: 結束一場賽局。附上參數 `-f` 則強制結束（不論結果）
         **$status**: 查看當前的情況
+
+        GitHub: https://github.com/karakarasuuuu/bob-the-casino-helper-in-discord
         ''')
     await cfx.reply(message)
 
